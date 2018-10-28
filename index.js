@@ -3,13 +3,38 @@
 const authentication = require('./authentication');
 const TriggercreateleadTrigger = require('./triggers/trigger_create_lead');
 const TriggerupdateleadTrigger = require('./triggers/trigger_update_lead');
-const ActioncreateleadCreate = require('./creates/action_create_lead');
-const ActionupdateleadCreate = require('./creates/action_update_lead');
 
-const maybeIncludeAuth = (request, z, bundle) => {
-  request.headers['api_key'] = `{${bundle.authData['api_key']}`;
+// authentication実行前にしか呼ばれてないみたい
+// 本当は全リクエスト前に実行したいけど…
+const includeApiKey = (request, z, bundle) => {
 
+  if (bundle.authData.api_Key) {
+    request.params = request.params || {};
+    request.params.api_key = bundle.authData.api_Key;
+    request.method = 'POST';
+
+    console.log('------------request---------------');
+    console.log(request);
+    console.log('------------request.params---------------');
+    console.log(request.params);
+
+    //
+    // request.headers.Authorization = bundle.authData.apiKey;
+    // (If you want to include the key as a header instead)
+    //
+  }
   return request;
+};
+
+// HTTP after middleware that checks for errors in the response.
+const checkForErrors = (response, z) => {
+  
+  if (response.status === 401) {
+    throw new z.errors.HaltedError('The API Key you supplied is invalidこっち？');
+  }
+
+  // If no errors just return original response
+  return response;
 };
 
 const App = {
@@ -18,9 +43,9 @@ const App = {
 
   authentication,
 
-  beforeRequest: [maybeIncludeAuth],
+  beforeRequest: [includeApiKey],
 
-  afterResponse: [],
+  afterResponse: [checkForErrors],
 
   resources: {},
 
@@ -32,8 +57,6 @@ const App = {
   searches: {},
 
   creates: {
-    [ActioncreateleadCreate.key]: ActioncreateleadCreate,
-    [ActionupdateleadCreate.key]: ActionupdateleadCreate
   }
 };
 
