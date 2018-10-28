@@ -8,26 +8,25 @@ const TriggerupdateleadTrigger = require('./triggers/trigger_update_lead');
 // 本当は全リクエスト前に実行したいけど…
 const includeApiKey = (request, z, bundle) => {
 
+  console.log('------------beforeRequest---------------');
+
   if (bundle.authData.api_Key) {
     request.params = request.params || {};
     request.params.api_key = bundle.authData.api_Key;
     request.method = 'POST';
 
-    console.log('------------request---------------');
-    console.log(request);
-    console.log('------------request.params---------------');
-    console.log(request.params);
-
-    //
-    // request.headers.Authorization = bundle.authData.apiKey;
-    // (If you want to include the key as a header instead)
-    //
+    // console.log('------------request---------------');
+    // console.log(request);
+    // console.log('------------request.params---------------');
+    // console.log(request.params);
   }
   return request;
 };
 
 // HTTP after middleware that checks for errors in the response.
 const checkForErrors = (response, z) => {
+
+  console.log('------------afterRequest---------------');
   
   if (response.status === 401) {
     throw new z.errors.HaltedError('The API Key you supplied is invalidこっち？');

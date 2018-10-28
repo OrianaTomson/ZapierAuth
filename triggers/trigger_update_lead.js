@@ -12,20 +12,38 @@ const getList = (z, bundle) => {
   return responsePromise.then(response => {
     response.throwForStatus();
 
+    // 新規登録を除外
+    var resItems = z.JSON.parse(response.content)['leads'];
+    var updateListArray;
+    var firstFlag = true;
+    resItems.forEach(function(value){
+     
+      //配列の各要素を2倍にする
+      if (value.created_at === value.updated_at){
+
+      }else{
+        if(firstFlag){
+          updateListArray = [value]
+          firstFlag = false;
+        }else{
+          updateListArray.push(value);
+        }
+      }
+    });
+
     // idを更新キーと結合して返却
-    return Zap.TRIGGER_KEY_post_poll(z,response);
+    return Zap.TRIGGER_KEY_post_poll(updateListArray);
   });
 };
 
 var Zap = {
-  TRIGGER_KEY_post_poll: function(z,response) {
-    var items = z.JSON.parse(response.content)['leads'];
+  TRIGGER_KEY_post_poll: function(updateListArray) {
+    var items = updateListArray;
     items.forEach(function(item) {
       item.originalId = item.id;
       item.id = item.id + '-' + item.updated_at;
     });
 
-    console.log(items);
     return items;
   }
 }
