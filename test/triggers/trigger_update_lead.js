@@ -10,9 +10,7 @@ describe('Triggers - Update Lead', () => {
 
   it('should get an array', done => {
     const bundle = {
-      authData: { api_key: process.env.API_KEY },
-
-      inputData: {id: 4692965, client_id: 1754730}
+      authData: { api_key: process.env.API_KEY }
     };
 
     appTester(App.triggers.trigger_create_lead.operation.perform, bundle)
